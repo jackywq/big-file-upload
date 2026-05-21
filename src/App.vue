@@ -605,6 +605,7 @@ body {
   justify-content: center;
   box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
   animation: pulse 2s ease-in-out infinite;
+  pointer-events: none;
 }
 
 @keyframes pulse {
@@ -626,6 +627,7 @@ body {
 .upload-text {
   position: relative;
   z-index: 1;
+  pointer-events: none;
 }
 
 .upload-title {
