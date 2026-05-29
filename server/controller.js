@@ -4,6 +4,32 @@ const fse = require("fs-extra");
 
 // 大文件存储目录
 const UPLOAD_DIR = path.resolve(__dirname, "..", "target");
+// 文件名映射文件路径
+const FILENAME_MAP_PATH = path.resolve(UPLOAD_DIR, "filename_map.json");
+
+// 读取文件名映射
+const readFilenameMap = async () => {
+  try {
+    if (await fse.pathExists(FILENAME_MAP_PATH)) {
+      const data = await fse.readFile(FILENAME_MAP_PATH, "utf-8");
+      return JSON.parse(data);
+    }
+  } catch (error) {
+    console.error("读取文件名映射失败:", error);
+  }
+  return {};
+};
+
+// 保存文件名映射
+const saveFilenameMap = async map => {
+  try {
+    // 确保目录存在
+    await fse.ensureDir(UPLOAD_DIR);
+    await fse.writeFile(FILENAME_MAP_PATH, JSON.stringify(map, null, 2));
+  } catch (error) {
+    console.error("保存文件名映射失败:", error);
+  }
+};
 
 // 提取后缀名
 const extractExt = filename =>
@@ -68,6 +94,61 @@ const mergeFileChunk = async (filePath, fileHash, size) => {
 };
 
 module.exports = class {
+  // 获取历史上传文件列表
+  async getUploadedFiles(req, res) {
+    try {
+      // 确保上传目录存在
+      if (!fse.existsSync(UPLOAD_DIR)) {
+        res.end(
+          JSON.stringify({
+            code: 0,
+            data: []
+          })
+        );
+        return;
+      }
+
+      // 读取文件名映射
+      const filenameMap = await readFilenameMap();
+
+      // 读取上传目录中的所有文件
+      const files = await fse.readdir(UPLOAD_DIR);
+
+      // 过滤掉切片目录和映射文件，只保留合并后的文件
+      const uploadedFiles = files
+        .filter(
+          file => !file.startsWith("chunkDir_") && file !== "filename_map.json"
+        )
+        .map(file => {
+          const filePath = path.resolve(UPLOAD_DIR, file);
+          const stats = fse.statSync(filePath);
+          return {
+            filename: filenameMap[file] || file,
+            hashedFilename: file,
+            size: stats.size,
+            uploadTime: stats.mtime,
+            filePath: filePath
+          };
+        });
+
+      res.end(
+        JSON.stringify({
+          code: 0,
+          data: uploadedFiles
+        })
+      );
+    } catch (error) {
+      console.error("获取历史文件列表失败:", error);
+      res.end(
+        JSON.stringify({
+          code: -1,
+          message: "获取文件列表失败",
+          data: []
+        })
+      );
+    }
+  }
+
   // 合并切片
   async handleMerge(req, res) {
     const data = await resolvePost(req);
@@ -75,6 +156,12 @@ module.exports = class {
     const ext = extractExt(filename);
     const filePath = path.resolve(UPLOAD_DIR, `${fileHash}${ext}`);
     await mergeFileChunk(filePath, fileHash, size);
+
+    // 保存文件名映射
+    const filenameMap = await readFilenameMap();
+    filenameMap[`${fileHash}${ext}`] = filename;
+    await saveFilenameMap(filenameMap);
+
     res.end(
       JSON.stringify({
         code: 0,

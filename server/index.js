@@ -29,6 +29,10 @@ server.on("request", async (req, res) => {
   if (req.url === "/delete") {
     await controller.deleteFiles(req, res);
   }
+
+  if (req.url === "/files") {
+    await controller.getUploadedFiles(req, res);
+  }
 });
 
 server.listen(3000, () => console.log("listening port 3000"));

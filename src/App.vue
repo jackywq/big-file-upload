@@ -33,6 +33,9 @@
 
       <!-- 切片列表：只有在有切片数据时显示 -->
       <ChunksList v-if="data.length > 0" :chunks="data" />
+
+      <!-- 历史文件列表 -->
+      <HistoryList ref="historyList" />
     </div>
   </div>
 </template>
@@ -43,6 +46,7 @@ import UploadHeader from "./components/UploadHeader.vue";
 import UploadCard from "./components/UploadCard.vue";
 import ProgressBar from "./components/ProgressBar.vue";
 import ChunksList from "./components/ChunksList.vue";
+import HistoryList from "./components/HistoryList.vue";
 
 // 切片大小：10MB
 const SIZE = 10 * 1024 * 1024;
@@ -60,7 +64,8 @@ export default {
     UploadHeader,
     UploadCard,
     ProgressBar,
-    ChunksList
+    ChunksList,
+    HistoryList
   },
   filters: {
     // 字节转换过滤器：将字节转换为KB
@@ -127,6 +132,12 @@ export default {
       this.hashPercentage = 0;
       this.fakeUploadPercentage = 0;
       this.status = Status.wait;
+      // 刷新历史文件列表
+      this.$nextTick(() => {
+        if (this.$refs.historyList) {
+          this.$refs.historyList.fetchFiles();
+        }
+      });
     },
     /**
      * 处理暂停操作
@@ -334,6 +345,12 @@ export default {
       });
       this.$message.success("upload success, check /target directory");
       this.status = Status.wait;
+      // 刷新历史文件列表
+      this.$nextTick(() => {
+        if (this.$refs.historyList) {
+          this.$refs.historyList.fetchFiles();
+        }
+      });
     },
     /**
      * 根据hash验证文件是否曾经已经被上传过
