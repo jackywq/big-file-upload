@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "large file upload",
   "engines": {
-    "node": "14.x"
+    "node": "24.x"
   },
   "main": "index.js",
   "scripts": {
