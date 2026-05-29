@@ -20,17 +20,17 @@ export default {
   props: {
     title: {
       type: String,
-      required: true,
+      required: true
     },
     percentage: {
       type: Number,
-      default: 0,
+      default: 0
     },
     isUpload: {
       type: Boolean,
-      default: false,
-    },
-  },
+      default: false
+    }
+  }
 };
 </script>
 
@@ -42,6 +42,7 @@ export default {
   border: 1px solid rgba(255, 255, 255, 0.1);
   padding: 24px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  margin-bottom: 20px;
 }
 
 .progress-header {
