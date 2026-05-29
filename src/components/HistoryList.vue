@@ -88,6 +88,7 @@ export default {
           this.files = result.data || [];
         }
       } catch (error) {
+        // eslint-disable-next-line no-console
         console.error("获取历史文件失败:", error);
       } finally {
         this.loading = false;
@@ -110,6 +111,7 @@ export default {
           await this.fetchFiles();
         }
       } catch (error) {
+        // eslint-disable-next-line no-console
         console.error("删除历史文件失败:", error);
       }
     },
