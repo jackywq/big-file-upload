@@ -66,7 +66,7 @@
         :class="{ 'btn-disabled': deleteDisabled }"
       >
         <SvgIcon name="delete" />
-        <span>删除</span>
+        <span>清空选中文件</span>
       </button>
     </div>
   </div>
@@ -144,7 +144,7 @@ export default {
       this.$emit("resume");
     },
     onDelete() {
-      this.$emit("delete");
+      this.$emit("clear-file");
     }
   }
 };

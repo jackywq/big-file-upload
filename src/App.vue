@@ -13,7 +13,7 @@
         @upload="handleUpload"
         @pause="handlePause"
         @resume="handleResume"
-        @delete="handleDelete"
+        @clear-file="handleClearFile"
       />
 
       <!-- 进度条区域：只有在非等待状态或哈希计算进行中时显示 -->
@@ -114,16 +114,10 @@ export default {
   },
   methods: {
     /**
-     * 处理删除操作
-     * 删除服务端文件并清空所有状态
+     * 处理清空选中文件操作
+     * 只清空上传框中的临时文件，不影响服务端
      */
-    async handleDelete() {
-      const { data } = await this.request({
-        url: "http://localhost:3000/delete"
-      });
-      if (JSON.parse(data).code === 0) {
-        this.$message.success("delete success");
-      }
+    handleClearFile() {
       // 重置数据
       this.resetData();
       this.container.file = null;
@@ -132,12 +126,6 @@ export default {
       this.hashPercentage = 0;
       this.fakeUploadPercentage = 0;
       this.status = Status.wait;
-      // 刷新历史文件列表
-      this.$nextTick(() => {
-        if (this.$refs.historyList) {
-          this.$refs.historyList.fetchFiles();
-        }
-      });
     },
     /**
      * 处理暂停操作

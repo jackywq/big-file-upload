@@ -4,10 +4,20 @@
       <div class="history-title">历史文件</div>
       <div class="history-actions">
         <div class="history-count">{{ files.length }} 个文件</div>
-        <button class="btn-refresh" @click="fetchFiles">
-          <svg-icon name="refresh" />
-          刷新
-        </button>
+        <div class="btn-group">
+          <button class="btn-refresh" @click="fetchFiles">
+            <svg-icon name="refresh" />
+            刷新
+          </button>
+          <button
+            class="btn-delete-all"
+            @click="handleDeleteAll"
+            :disabled="files.length === 0 || loading"
+          >
+            <svg-icon name="delete" />
+            删除全部
+          </button>
+        </div>
       </div>
     </div>
 
@@ -81,6 +91,26 @@ export default {
         console.error("获取历史文件失败:", error);
       } finally {
         this.loading = false;
+      }
+    },
+    async handleDeleteAll() {
+      // 二次确认弹窗
+      const confirmed = window.confirm(
+        "确定要删除全部历史文件吗？此操作不可恢复！"
+      );
+      if (!confirmed) return;
+
+      try {
+        const response = await fetch("http://localhost:3000/delete", {
+          method: "POST"
+        });
+        const result = await response.json();
+        if (result.code === 0) {
+          // 删除成功，刷新文件列表
+          await this.fetchFiles();
+        }
+      } catch (error) {
+        console.error("删除历史文件失败:", error);
       }
     },
     formatFileSize(bytes) {
@@ -213,6 +243,11 @@ export default {
   border-radius: 20px;
 }
 
+.btn-group {
+  display: flex;
+  gap: 10px;
+}
+
 .btn-refresh {
   display: inline-flex;
   align-items: center;
@@ -235,6 +270,36 @@ export default {
 
   &:active {
     transform: translateY(0);
+  }
+}
+
+.btn-delete-all {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border: 1px solid rgba(255, 107, 107, 0.5);
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #ff6b6b;
+  background: rgba(255, 107, 107, 0.1);
+  cursor: pointer;
+  transition: all 0.3s ease;
+
+  &:hover:not(:disabled) {
+    background: rgba(255, 107, 107, 0.2);
+    border-color: rgba(255, 107, 107, 0.7);
+    transform: translateY(-2px);
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(0);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
   }
 }
 
