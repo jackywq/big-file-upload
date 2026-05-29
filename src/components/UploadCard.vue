@@ -59,7 +59,12 @@
           <span>暂停</span>
         </button>
       </div>
-      <button class="btn btn-danger" @click="onDelete">
+      <button
+        class="btn btn-danger"
+        @click="onDelete"
+        :disabled="deleteDisabled"
+        :class="{ 'btn-disabled': deleteDisabled }"
+      >
         <SvgIcon name="delete" />
         <span>删除</span>
       </button>
@@ -106,6 +111,9 @@ export default {
       return (
         !this.file || [Status.pause, Status.uploading].includes(this.status)
       );
+    },
+    deleteDisabled() {
+      return this.status === Status.uploading;
     }
   },
   methods: {
